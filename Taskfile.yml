@@ -1,0 +1,25 @@
+version: '3'
+
+tasks:
+  install:
+    desc: Install Python dependencies
+    cmd: pip install -r requirements.txt
+
+  dev:
+    desc: Run template dev server with sample content
+    cmds:
+      - python3 scripts/yt_template_dev.py
+      - lsof -ti:8765 | xargs kill 2>/dev/null; sleep 0.2; python3 -m http.server 8765 --directory scripts & sleep 0.4 && (open "http://localhost:8765/sample_output.html" 2>/dev/null || xdg-open "http://localhost:8765/sample_output.html" 2>/dev/null || echo "Open http://localhost:8765/sample_output.html in your browser")
+
+  install-raycast:
+    desc: Copy scripts/video-lens.sh to ~/.raycast/scripts/ and make it executable
+    cmds:
+      - cp scripts/raycast-video-lens.sh ~/.raycast/scripts/video-lens.sh
+      - chmod +x ~/.raycast/scripts/video-lens.sh
+
+  install-skill:
+    desc: Copy SKILL.md and template.html into ~/.claude/skills/video-lens/
+    cmds:
+      - mkdir -p ~/.claude/skills/video-lens
+      - cp skill/SKILL.md ~/.claude/skills/video-lens/SKILL.md
+      - cp skill/template.html ~/.claude/skills/video-lens/template.html
