@@ -2,22 +2,18 @@
 
 ## Workflow
 
-> **Source of truth is always this repo.** Edit files here first — never in deployed locations like `~/.{agent}/skills/` or `~/.raycast/scripts/`. Those are deploy targets, not sources.
+> **Source of truth is always this repo.** Edit files here first — never in `~/.claude/skills/`. That is a deploy target, not a source.
 
-After editing, sync to deployed locations:
-- `skills/video-lens/` or `template.html` → `task install-skill-local AGENT=<agent>`
+After editing, sync to deployed location:
+- `skills/video-lens/` or `template.html` → `task install-skill-local`
 - `skills/video-lens-gallery/index.html` → `task build-index` (regenerates `~/Downloads/video-lens/index.html`)
-
-> **Note:** `install-skill` pulls from GitHub — push first or it installs the last published version.
 
 ## Install commands
 
 ```bash
-task install-libraries                      # installs Python dependencies (pip install -r requirements.txt)
-task install-skill                          # installs skill for all detected agents via npx skills CLI
-task install-skill-local AGENT=claude       # copies skills/video-lens/ → ~/.claude/skills/video-lens/
-task install-raycast                        # copies scripts/raycast-video-lens.sh → ~/.raycast/scripts/video-lens.sh
-task install-raycast AGENT=copilot          # installs Raycast script for a specific agent
+task install-libraries          # installs Python dependencies (pip install -r requirements.txt)
+task install-skill-local        # copies skills/ → ~/.claude/skills/
+task build-index                # rebuilds gallery manifest
 ```
 
 ## Repo layout
@@ -28,12 +24,16 @@ video-lens/
   Taskfile.yml
   requirements.txt
   scripts/
-    raycast-video-lens.sh  ← Raycast script (source of truth)
     yt_template_dev.py     ← dev server helper
   skills/
     video-lens/
       SKILL.md             ← skill prompt (source of truth)
       template.html        ← HTML report template (source of truth)
+      scripts/
+        fetch_transcript.py
+        fetch_metadata.py
+        render_report.py
+        serve_report.sh
     video-lens-gallery/
       SKILL.md             ← gallery skill prompt (source of truth)
       index.html           ← gallery viewer (source of truth)

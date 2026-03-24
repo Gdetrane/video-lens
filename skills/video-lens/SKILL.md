@@ -2,7 +2,7 @@
 name: video-lens
 description: Fetch a YouTube transcript and generate an executive summary, key points, and timestamped topic list as a polished HTML report. Activate on YouTube URLs or requests like "summarize this video", "what's this about", "give me the highlights", "TL;DR this", "digest this video", "watch this for me", "I watched this and want a breakdown", or "make notes on this talk". Supports non-English videos, language selection, and yt-dlp enrichment for chapters, video description, and richer metadata.
 license: MIT
-compatibility: "Requires Python 3 and youtube-transcript-api >=0.6.3. Optional but recommended: yt-dlp and deno for enriched metadata and chapters."
+compatibility: "Requires Python 3, youtube-transcript-api >=0.6.3, and yt-dlp for metadata and chapters."
 allowed-tools: Bash Read
 metadata:
   author: kar2phi
@@ -49,7 +49,7 @@ This is a *transcript selection* preference — it fetches the requested languag
 Run this exact command — do not add comments or modify it. Substitute the real video ID for `VIDEO_ID` and the language code for `LANG_PREF_VALUE` (omit the language argument if none).
 
 ```bash
-_sd=$(for d in ~/.agents ~/.claude ~/.copilot ~/.gemini ~/.cursor ~/.windsurf ~/.opencode ~/.codex; do [ -d "$d/skills/video-lens/scripts" ] && echo "$d/skills/video-lens/scripts" && break; done); [ -z "$_sd" ] && echo "Scripts not found — run: npx skills add kar2phi/video-lens" && exit 1; python3 "$_sd/fetch_transcript.py" "VIDEO_ID" "LANG_PREF_VALUE"
+_sd="$HOME/.claude/skills/video-lens/scripts"; [ -d "$_sd" ] || { echo "Scripts not found — copy video-lens to ~/.claude/skills/video-lens/"; exit 1; }; python3 "$_sd/fetch_transcript.py" "VIDEO_ID" "LANG_PREF_VALUE"
 ```
 
 #### If the output is saved to a file
@@ -62,10 +62,10 @@ If a `LANG_WARN:` line is present in the output, the requested language was not 
 
 ### 2b. Fetch enriched metadata with yt-dlp
 
-**Always run this step after Step 2.** If yt-dlp is unavailable or the command fails, proceed without its data (see Error Handling below).
+**Always run this step after Step 2.** yt-dlp is required for enriched metadata, chapters, and video descriptions. If the command fails, report the error and proceed with Step 2 metadata only (see Error Handling below).
 
 ```bash
-_sd=$(for d in ~/.agents ~/.claude ~/.copilot ~/.gemini ~/.cursor ~/.windsurf ~/.opencode ~/.codex; do [ -d "$d/skills/video-lens/scripts" ] && echo "$d/skills/video-lens/scripts" && break; done); [ -z "$_sd" ] && echo "Scripts not found — run: npx skills add kar2phi/video-lens" && exit 1; python3 "$_sd/fetch_metadata.py" "VIDEO_ID"
+_sd="$HOME/.claude/skills/video-lens/scripts"; [ -d "$_sd" ] || { echo "Scripts not found — copy video-lens to ~/.claude/skills/video-lens/"; exit 1; }; python3 "$_sd/fetch_metadata.py" "VIDEO_ID"
 ```
 
 Parse the prefixed output lines:
@@ -188,7 +188,7 @@ Values to fill:
 Run this as a single Bash command. Build the JSON object inside a heredoc and pipe it to the render script. Replace `OUTPUT_PATH` with the absolute output path from Step 4.
 
 ```bash
-_sd=$(for d in ~/.agents ~/.claude ~/.copilot ~/.gemini ~/.cursor ~/.windsurf ~/.opencode ~/.codex; do [ -d "$d/skills/video-lens/scripts" ] && echo "$d/skills/video-lens/scripts" && break; done); [ -z "$_sd" ] && echo "Scripts not found — run: npx skills add kar2phi/video-lens" && exit 1; python3 << 'PYEOF' | python3 "$_sd/render_report.py" "OUTPUT_PATH"
+_sd="$HOME/.claude/skills/video-lens/scripts"; [ -d "$_sd" ] || { echo "Scripts not found — copy video-lens to ~/.claude/skills/video-lens/"; exit 1; }; python3 << 'PYEOF' | python3 "$_sd/render_report.py" "OUTPUT_PATH"
 import json, sys
 meta_obj = {
     "videoId":        "...",
@@ -222,7 +222,7 @@ PYEOF
 The embedded YouTube player requires HTTP — `file://` URLs are blocked (Error 153). After writing the file, run the serve script which kills any existing server on port 8765, starts a new one, opens the browser, and prints `HTML_REPORT: <path>`.
 
 ```bash
-_sd=$(for d in ~/.agents ~/.claude ~/.copilot ~/.gemini ~/.cursor ~/.windsurf ~/.opencode ~/.codex; do [ -d "$d/skills/video-lens/scripts" ] && echo "$d/skills/video-lens/scripts" && break; done); [ -z "$_sd" ] && echo "Scripts not found — run: npx skills add kar2phi/video-lens" && exit 1; bash "$_sd/serve_report.sh" "OUTPUT_PATH"
+_sd="$HOME/.claude/skills/video-lens/scripts"; [ -d "$_sd" ] || { echo "Scripts not found — copy video-lens to ~/.claude/skills/video-lens/"; exit 1; }; bash "$_sd/serve_report.sh" "OUTPUT_PATH"
 ```
 
 Replace `OUTPUT_PATH` with the absolute path to the HTML file from Step 4. The script keeps a single server running on port 8765 across multiple reports — all files in the output directory remain accessible at `http://localhost:8765/`.
@@ -232,7 +232,7 @@ Replace `OUTPUT_PATH` with the absolute path to the HTML file from Step 4. The s
 After serving the report, rebuild the index so the new report appears in the index page immediately.
 
 ```bash
-_gd=$(for d in ~/.agents ~/.claude ~/.copilot ~/.gemini ~/.cursor ~/.windsurf ~/.opencode ~/.codex; do [ -d "$d/skills/video-lens-gallery/scripts" ] && echo "$d/skills/video-lens-gallery/scripts" && break; done); [ -z "$_gd" ] && echo "WARNING: build_index.py not found — index not rebuilt" && exit 0; python3 "$_gd/build_index.py" --dir ~/Downloads/video-lens
+_gd="$HOME/.claude/skills/video-lens-gallery/scripts"; [ -d "$_gd" ] || { echo "WARNING: build_index.py not found — index not rebuilt"; exit 0; }; python3 "$_gd/build_index.py" --dir ~/Downloads/video-lens
 ```
 
 If `build_index.py` is unavailable or fails, print a warning and continue — do NOT stop the skill.
@@ -251,7 +251,7 @@ Handle these failure modes gracefully:
 | **Metadata extraction fails** (title/channel/views empty) | Proceed with the transcript. Use whatever metadata is available; leave missing fields out of `META_LINE`. |
 | **`youtube_transcript_api` not installed** | Print: `pip install 'youtube-transcript-api>=0.6.3'` and stop. |
 | **Requested language not available** | Fall back to auto-selected transcript; print `LANG_WARN:` line; append `⚠ Requested language not available` to `META_LINE`. |
-| **`yt-dlp` not installed** (Step 2b) | Suggest `brew install yt-dlp` or `pip install yt-dlp`; continue without enriched metadata or description context — do NOT stop. |
+| **`yt-dlp` not installed** (Step 2b) | Print: `pip install yt-dlp` and stop — yt-dlp is required. |
 | **yt-dlp command fails or returns invalid JSON** (Step 2b) | The Python wrapper emits `YTDLP_ERROR: <msg>` — report it to the user; fall back to Step 2 metadata and no description context — do NOT stop. |
 | **Network / transient error** | Retry once. If it fails again, report the error and stop. |
 

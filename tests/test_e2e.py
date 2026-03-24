@@ -196,7 +196,7 @@ def test_claude_session():
     # claude --print stdout (only the final assistant text response does).
     downloads = Path.home() / "Downloads" / "video-lens"
     matches = sorted(
-        [p for p in downloads.glob("????-??-??-??????-video-lens_*.html")
+        [p for p in downloads.glob("**/????-??-??-??????-video-lens_*.html")
          if p.stat().st_mtime >= before],
         key=lambda p: p.stat().st_mtime,
     )

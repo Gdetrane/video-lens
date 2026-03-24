@@ -18,7 +18,7 @@ def _linkify(line):
         parts.append(html.escape(line[last:m.start()]))
         url = m.group()
         parts.append(
-            f'<a href="{html.escape(url, quote=True)}" target="_blank" rel="noopener">'
+            f'<a href="{html.escape(url, quote=True)}" target="_blank" rel="noopener noreferrer">'
             f"{html.escape(url)}</a>"
         )
         last = m.end()
@@ -63,8 +63,8 @@ def main():
             capture_output=True, text=True, timeout=60,
         )
     except FileNotFoundError:
-        print("YTDLP_ERROR: yt-dlp not installed — run: brew install yt-dlp or pip install yt-dlp")
-        sys.exit(0)
+        print("YTDLP_ERROR: yt-dlp not installed — run: pip install yt-dlp")
+        sys.exit(1)
     except subprocess.TimeoutExpired:
         print("YTDLP_ERROR: yt-dlp timed out after 60s")
         sys.exit(0)

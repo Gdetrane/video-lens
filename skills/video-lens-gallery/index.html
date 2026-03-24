@@ -552,7 +552,7 @@
   <div id="help-modal">
     <button id="help-close" aria-label="Close">×</button>
     <h3>About</h3>
-    <p>video-lens fetches a YouTube transcript and uses AI to generate a structured report — executive summary, key points, analysis, takeaway, a timestamped outline, and an in-page player. <a href="https://github.com/kar2phi/video-lens" target="_blank">View source ↗</a></p>
+    <p>video-lens fetches a YouTube transcript and uses AI to generate a structured report — executive summary, key points, analysis, takeaway, a timestamped outline, and an in-page player. <a href="https://github.com/kar2phi/video-lens" target="_blank" rel="noopener noreferrer">View source ↗</a></p>
     <p>video-lens gallery — browse and search your saved reports. Click any card or row to open the full report.</p>
     <h3>Shortcuts</h3>
     <div class="help-shortcuts">
@@ -923,7 +923,7 @@
       titleLink.className = 'list-title';
       titleLink.href = href;
       titleLink.target = '_blank';
-      titleLink.rel = 'noopener';
+      titleLink.rel = 'noopener noreferrer';
       titleLink.textContent = r.title || 'Untitled';
       tdTitle.appendChild(titleLink);
       tr.appendChild(tdTitle);
@@ -1013,7 +1013,7 @@
     titleLink.className = 'card-title';
     titleLink.href = reportUrl(href);
     titleLink.target = '_blank';
-    titleLink.rel = 'noopener';
+    titleLink.rel = 'noopener noreferrer';
     titleLink.textContent = r.title || 'Untitled';
     body.appendChild(titleLink);
 

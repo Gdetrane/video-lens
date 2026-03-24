@@ -11,25 +11,14 @@ Manage and browse your saved video-lens reports.
 
 ## Step 1 — Locate skill scripts
 
-Discover both `video-lens/scripts` (`$_sd`) and `video-lens-gallery/scripts` (`$_gd`) using the standard agent discovery pattern:
-
 ```bash
-# video-lens scripts (needed for serve_report.sh in Step 4)
 _sd="$HOME/.claude/skills/video-lens/scripts"
-[ -d "$_sd" ] || _sd="$HOME/.gemini/skills/video-lens/scripts"
-[ -d "$_sd" ] || _sd="$HOME/.opencode/skills/video-lens/scripts"
-[ -d "$_sd" ] || _sd="$HOME/.cursor/skills/video-lens/scripts"
-
-# video-lens-gallery scripts (needed for build_index.py in Step 3)
 _gd="$HOME/.claude/skills/video-lens-gallery/scripts"
-[ -d "$_gd" ] || _gd="$HOME/.gemini/skills/video-lens-gallery/scripts"
-[ -d "$_gd" ] || _gd="$HOME/.opencode/skills/video-lens-gallery/scripts"
-[ -d "$_gd" ] || _gd="$HOME/.cursor/skills/video-lens-gallery/scripts"
 ```
 
 If `$_sd` does not exist, exit with:
 
-> `video-lens skill not found — install it first: npx skills add kar2phi/video-lens`
+> `video-lens skill not found — copy video-lens to ~/.claude/skills/video-lens/`
 
 ## Step 2 — Backfill metadata (only if requested)
 

@@ -3,7 +3,7 @@
 #
 # Usage: serve_report.sh /absolute/path/to/report.html
 #
-# - Kills any existing server on port 8765
+# - Kills any previous video-lens server (via PID file)
 # - Starts python3 http.server in the file's directory
 # - Opens the report in the default browser
 
@@ -24,6 +24,8 @@ fi
 DIR="$(cd "$(dirname "$HTML_PATH")" && pwd)"
 FILE="$(basename "$HTML_PATH")"
 PORT=8765
+PID_DIR="${XDG_CACHE_HOME:-$HOME/.cache}/video-lens"
+PID_FILE="$PID_DIR/server.pid"
 
 if [[ "$(basename "$DIR")" == "reports" ]]; then
   SERVE_DIR="$(dirname "$DIR")"
@@ -33,21 +35,37 @@ else
   URL_PATH="$FILE"
 fi
 
-# Kill any existing server on the port
-lsof -ti:"$PORT" | xargs kill 2>/dev/null || true
-sleep 0.2
+# Kill previous video-lens server via PID file
+mkdir -p "$PID_DIR"
+if [ -f "$PID_FILE" ]; then
+  OLD_PID="$(cat "$PID_FILE" 2>/dev/null || true)"
+  if [ -n "$OLD_PID" ] && kill -0 "$OLD_PID" 2>/dev/null; then
+    kill "$OLD_PID" 2>/dev/null || true
+    sleep 0.2
+  fi
+  rm -f "$PID_FILE"
+fi
 
 # Start HTTP server in background
 python3 -m http.server "$PORT" --directory "$SERVE_DIR" &>/dev/null &
+SERVER_PID=$!
+echo "$SERVER_PID" > "$PID_FILE"
 sleep 1
+
+# Verify server started
+if ! kill -0 "$SERVER_PID" 2>/dev/null; then
+  echo "ERROR: HTTP server failed to start on port $PORT" >&2
+  rm -f "$PID_FILE"
+  exit 1
+fi
 
 # Open in browser
 URL="http://localhost:${PORT}/${URL_PATH}"
 if [[ "${NO_BROWSER:-}" != "1" ]]; then
-  if command -v open &>/dev/null; then
-      open "$URL"
-  elif command -v xdg-open &>/dev/null; then
+  if command -v xdg-open &>/dev/null; then
       xdg-open "$URL"
+  elif command -v open &>/dev/null; then
+      open "$URL"
   else
       echo "Open $URL in your browser"
   fi
